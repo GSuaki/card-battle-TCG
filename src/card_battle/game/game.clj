@@ -35,8 +35,8 @@
   (update-in game [:players] (fn [pls] (players/make-moves pls active-player))))
 
 (defn start-turn [game]
-  (Thread/sleep 100)
-  (println "Starting turn: " (get-in game [:players (:active-player game)]))
+  (Thread/sleep 500)
+  (do (println) (log/info "Starting turn: " (get-in game [:players (:active-player game)])))
   (cond (winner? game) (announce-winner game)
         :else (-> game
                   (fulfill-player-mana)

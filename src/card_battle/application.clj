@@ -12,5 +12,5 @@
         p2 (do (print "Qual o nome do jogador 2? ") (flush) (read-line))
         winner (-> (game/new-game [p1 p2])
                    (game/start-game)
-                   ((fn [game] (:winner game))))]
+                   ((fn [game] (get-in game [:winner :name]))))]
     (log/info "We have a Winner! Congratulations: " winner)))

@@ -1,6 +1,17 @@
 (ns card-battle.game.player
   (:require [clojure.tools.logging :as log]))
 
+(def desc #(compare %2 %1))
+
+(defn remove-once [pred coll]
+  ((fn inner [coll]
+     (lazy-seq
+       (when-let [[x & xs] (seq coll)]
+         (if (pred x)
+           xs
+           (cons x (inner xs))))))
+   coll))
+
 (defn fulfill-mana
   "Fulfill player mana"
   [{current-slots :manaSlots, :as player}]
@@ -22,8 +33,8 @@
   2. If already has 5 cards on hand, discard the new card
   3. Else get one card from deck to players hand"
   [{cards :cards, hand :hand, health :health, :as player}]
-  (cond (= (count cards) 0) (assoc player :health (- health 1))
-        (= (count hand) 5) (assoc player :cards (drop 1 cards))
+  (cond (= (count cards) 0) (assoc player :health (dec health))
+        (= (count hand) 5) (assoc player :cards (rest cards))
         :else (assoc player :hand (conj hand (first cards)) :cards (rest cards))))
 
 (defn can-afford-any?
@@ -33,12 +44,17 @@
 
 (defn play-cards
   "Play card on the hand if while can afford"
-  [{hand :hand, mana :mana, :as active}, {health :health, :as opponent}]
+  [{hand :hand, mana :mana, name :name, :as active}, {health :health, :as opponent}]
   (if (can-afford-any? hand mana)
-    (let [affordable-cards (filter #(<= % mana) hand)
+    (let [player-hand (sort desc hand)
+          affordable-cards (sort desc (filter #(<= % mana) player-hand))
           card (first affordable-cards)]
+
+      (log/info "New attack incoming: " name)
+      (log/info "Hand: " player-hand ", Affordable cards: " affordable-cards ", Mana: " mana ", Damage: " card)
+
       (play-cards
-        (assoc active :hand (rest affordable-cards) :mana (- mana card))
+        (assoc active :hand (remove-once #(= % card) player-hand) :mana (- mana card))
         (assoc opponent :health (- health card))))
     {:active active :opponent opponent}))
 
