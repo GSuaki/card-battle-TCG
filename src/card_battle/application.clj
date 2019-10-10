@@ -10,5 +10,7 @@
   (log/info "Starting server...")
   (let [p1 (do (print "Qual o nome do jogador 1? ") (flush) (read-line))
         p2 (do (print "Qual o nome do jogador 2? ") (flush) (read-line))
-        new-game (game/new-game [p1 p2])]
-    (log/info (game/start-game new-game))))
+        winner (-> (game/new-game [p1 p2])
+                   (game/start-game)
+                   ((fn [game] (:winner game))))]
+    (log/info "We have a Winner! Congratulations: " winner)))
