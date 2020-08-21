@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "io.vavr:vavr:0.10.3"
 
     // testImplementation
     testImplementation("io.mockk:mockk:1.9.1")
